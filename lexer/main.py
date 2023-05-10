@@ -24,7 +24,7 @@ token_patterns = [
     (r"was born called\s+[_a-zA-Z][_a-zA-Z0-9]*\s*[.]?", HERO_NAME),
     (r"The hero wields a mighty Sword\s*[,:]?", INTEGER_SWORD),
     (r"forged with the power of\s+", POWER),
-    (r"[-+]?[0-9]+\s*[.]?", NUMBER),
+    (r"[-+]?[0-9]+", NUMBER),
 ]
 
 def lexer(code):

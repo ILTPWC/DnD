@@ -31,12 +31,13 @@ This project includes a lexer, parser, interpreter, and compiler for the DnD++ p
 To tokenize, parse, interpret, or compile DnD++ code, follow these steps:
 
 1. Write your DnD++ code in a text file, e.g., example.dndpp.
-2. Use the provided Python scripts to perform the desired operation on your code:
-3. Tokenize: python lexer.py example.dndpp
-4. Parse: python parser.py example.dndpp
-5. Interpret: python interpreter.py example.dndpp
-6. Compile: python compiler.py example.dndpp
-7. Review the output of the operation and continue with your development.
+2. Use the main.py example.dndpp to generate a .asm file
+3. Assembe the .asm file with NASM and link the object file with GCC after that generate the executable
+
+`nasm -f elf64 example.asm -o example.o`
+`gcc example.o -o example`
+`./example`
+
 
 And the most important think have fun! and try to play the adventure with your DnD Party.
 

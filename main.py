@@ -1,8 +1,8 @@
 import sys
 from lexer.main import lexer
-#from parser import Parser
-#from interpreter import Interpreter
-#from compiler import Compiler
+from parser.main import Parser
+from interpreter.main import Interpreter
+from compiler.main import Compiler
 
 def main():
     if len(sys.argv) < 2:
@@ -14,24 +14,21 @@ def main():
         code = f.read()
 
     tokens = lexer(code)
-    print("Tokens:")
-    for token in tokens:
-        print(token)
 
-    #parser = Parser(tokens)
-    #ast = parser.parse()
-    #print("\nAST:")
-    #print(ast)
+    parser = Parser(tokens)
+    ast = parser.parse()
 
-    #interpreter = Interpreter(ast)
-    #interpreter.interpret()
-    #print("\nSymbol Table:")
-    #print(interpreter.symbol_table)
+    interpreter = Interpreter(ast)
+    interpreter.interpret()
 
-    #compiler = Compiler(ast)
-    #assembly_code = compiler.compile()
-    #print("\nGenerated x86 Assembly Code:")
-    #print(assembly_code)
+    compiler = Compiler(ast)
+    assembly_code = compiler.compile()
+
+    asm_file = source_file.replace(".dndpp", ".asm")
+    with open(asm_file, "w") as f:
+        f.write(assembly_code)
+
+    print(f"Generated x86 Assembly Code saved to {asm_file}")
 
 if __name__ == "__main__":
     main()
