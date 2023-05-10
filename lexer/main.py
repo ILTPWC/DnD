@@ -17,6 +17,7 @@ HERO_NAME = "HERO_NAME"
 INTEGER_SWORD = "INTEGER_SWORD"
 POWER = "POWER"
 NUMBER = "NUMBER"
+COMMENT = "COMMENT"
 
 token_patterns = [
     (r"In the realm of\s+[_a-zA-Z][_a-zA-Z0-9]*\s*,", REALM),
@@ -25,6 +26,7 @@ token_patterns = [
     (r"The hero wields a mighty Sword\s*[,:]?", INTEGER_SWORD),
     (r"forged with the power of\s+", POWER),
     (r"[-+]?[0-9]+", NUMBER),
+    (r".*?(?=\n|$)", COMMENT), 
 ]
 
 def lexer(code):
@@ -38,7 +40,8 @@ def lexer(code):
             if match:
                 matched = True
                 token_value = match.group(0)
-                tokens.append(Token(token_type, token_value))
+                if token_type != COMMENT:
+                    tokens.append(Token(token_type, token_value))
                 code = code[len(token_value):]
                 break
 
