@@ -61,6 +61,13 @@ ToDo: Add Content
 ToDo: Add Content
 
 
+## Examples
+
+The following example demonstrates how to declare and initialize a variable in the DnD++ programming language:
+
+`In the realm of Variables, a legendary hero was born called healthPoints. The hero wields a mighty Sword, forged with the power of 100`
+
+
 ## Contributing
 
 We welcome contributions from the community! If you have any ideas, suggestions, or improvements for the DnD++ programming language, please feel free to submit an issue or pull request.
