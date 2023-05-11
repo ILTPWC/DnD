@@ -2,7 +2,7 @@ import sys
 from lexer.main import lexer
 from parser.main import Parser
 from interpreter.main import Interpreter
-from compiler.main import Compiler
+from compiler.main import compile_to_llvm
 
 def main():
     if len(sys.argv) < 2:
@@ -15,14 +15,20 @@ def main():
 
     tokens = lexer(code)
 
+    print("Token:")
+    for token in tokens:
+        print(token)
+
     parser = Parser(tokens)
     ast = parser.parse()
 
-    interpreter = Interpreter(ast)
-    interpreter.interpret()
+    print("\nAST:")
+    print(ast)
 
-    compiler = Compiler(ast)
-    assembly_code = compiler.compile()
+    interpreter = Interpreter()
+    interpreter.interpret(ast)
+
+    compile_to_llvm(ast)
 
     asm_file = source_file.replace(".dndpp", ".asm")
     with open(asm_file, "w") as f:

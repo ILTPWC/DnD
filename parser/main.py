@@ -1,44 +1,50 @@
-class ASTNode:
-    def __init__(self, node_type, value=None, children=None):
-        self.node_type = node_type
-        self.value = value
-        self.children = children if children else []
-
-    def __str__(self):
-        return f"{self.node_type}({self.value})"
-
-    def __repr__(self):
-        return self.__str__()
-
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
-        self.index = 0
+        self.pos = 0
 
     def parse(self):
-        return self.parse_declaration()
+        commands = []
+        while self.pos < len(self.tokens):
+            command = self.parse_command()
+            commands.append(command)
+            self.pos += 1
+        return commands
 
-    def parse_declaration(self):
-        realm = self.expect("REALM")
-        hero = self.expect("HERO")
-        hero_name = self.expect("HERO_NAME")
-        integer_sword = self.expect("INTEGER_SWORD")
-        power = self.expect("POWER")
-        number = self.expect("NUMBER")
+    def parse_command(self):
+        if self.pos >= len(self.tokens):
+            return None 
 
-        variable_name = hero_name.value.split()[-1]
-        variable_value = int(number.value)
+        command = {}
+        token_type = (self.tokens[self.pos][0])[1]
 
-        return ASTNode("VariableDeclaration",
-            value={"name": variable_name, "value": variable_value})
+        if token_type == "VARIABLE":
+            command["type"] = "declaration"
+            command["value_type"] = (self.tokens[0][2])[1]
+            command["name"] = (self.tokens[0][1])[0]
+            command["value"] = (self.tokens[0][4])[0]
+        elif token_type in ["ADD_VALUE", "ADD_VARIABLE", "ADD_NUMBERS"]:
+            command["type"] = "assignment"
+            command["name"] = self.parse_variable_name()
+            command["value"] = self.parse_value()
+        else:
+            self.pos += 1
+        return command
 
-    def expect(self, token_type):
-        if self.index >= len(self.tokens):
-            raise ValueError("Unexpected end of input")
+    def parse_variable_name(self):
+        if self.tokens[self.pos][1] != "VARIABLE_NAME":
+            raise SyntaxError("Expected a variable name")
+        return self.tokens[self.pos][0]
 
-        token = self.tokens[self.index]
-        if token.token_type != token_type:
-            raise ValueError(f"Unexpected token: {token}, expected {token_type}")
+    def parse_value(self):
+        token_type = self.tokens[self.pos][1]
+        if token_type in ["INTEGER_NUMBER", "FLOAT_NUMBER", "STRING", "BOOL_VALUE"]:
+            return self.tokens[self.pos][0]
+        elif token_type == "VARIABLE_NAME":
+            return {"type": "variable", "name": self.tokens[self.pos][0]}
+        else:
+            raise SyntaxError("Expected a value")
 
-        self.index += 1
-        return token
+def parse(tokens):
+    parser = Parser(tokens)
+    return parser.parse()

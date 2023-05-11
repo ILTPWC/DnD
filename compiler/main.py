@@ -1,31 +1,43 @@
-class Compiler:
-    def __init__(self, ast):
-        self.ast = ast
-        self.assembly_code = []
+import llvmlite.ir as ir
+import llvmlite.binding as llvm
 
-    def compile(self):
-        self.emit("; Generated x86 assembly code")
-        self.emit("section .data")
-        self.emit("section .text")
-        self.emit("global _start")
-        self.emit("_start:")
-        self.emit("    ; Write variable declarations")
-        self.compile_node(self.ast)
-        self.emit("    ; Exit system call")
-        self.emit("    mov eax, 1")
-        self.emit("    xor ebx, ebx")
-        self.emit("    int 0x80")
-        return "\n".join(self.assembly_code)
+class Codegen:
+    def __init__(self):
+        self.module = ir.Module()
+        self.builder = ir.IRBuilder()
+        self.variables = {}
 
-    def compile_node(self, node):
-        if node.node_type == "VariableDeclaration":
-            self.compile_variable_declaration(node)
+    def generate_code(self, commands):
+        for command in commands:
+            if command['type'] == 'declaration':
+                self.handle_declaration(command)
+            elif command['type'] == 'assignment':
+                self.handle_assignment(command)
 
-    def compile_variable_declaration(self, node):
-        name = node.value["name"]
-        value = node.value["value"]
-        self.emit(f"    ; Declare variable {name} with value {value}")
-        self.emit(f"    mov dword [{name}], {value}")
+    def handle_declaration(self, command):
+        var_type = ir.IntType(32) if command['value_type'] == 'INTEGER' else ir.FloatType()
+        self.variables[command['name']] = self.builder.alloca(var_type, name=command['name'])
 
-    def emit(self, code):
-        self.assembly_code.append(code)
+    def handle_assignment(self, command):
+        if command['name'] not in self.variables:
+            raise SyntaxError("Undefined variable: " + command['name'])
+        else:
+            value = command['value']
+            if isinstance(value, dict) and value['type'] == 'variable':
+                if value['name'] not in self.variables:
+                    raise SyntaxError("Undefined variable: " + value['name'])
+                else:
+                    value = self.variables[value['name']]
+            self.builder.store(value, self.variables[command['name']])
+
+def compile_to_llvm(commands):
+    codegen = Codegen()
+    codegen.generate_code(commands)
+    llvm.initialize()
+    llvm.initialize_native_target()
+    llvm.initialize_native_asmprinter()
+    target = llvm.Target.from_default_triple()
+    target_machine = target.create_target_machine()
+    backing_mod = llvm.parse_assembly(str(codegen.module))
+    engine = llvm.create_mcjit_compiler(backing_mod, target_machine)
+    return engine
